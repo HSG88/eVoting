@@ -1,0 +1,21 @@
+{
+  "name": "voting",
+  "version": "1.0.0",
+  "description": "",
+  "main": "no",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "elliptic": "^6.5.2",
+    "ethereumjs-abi": "^0.6.8",
+    "ganache-time-traveler": "^1.0.5",
+    "secure-random": "^1.1.2",
+    "web3": "^1.2.4"
+  }
+}
