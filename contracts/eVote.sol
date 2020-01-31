@@ -36,7 +36,8 @@ contract eVote {
         voters.push(msg.sender);
         publicKeys[msg.sender] = _pubKey;
     }
-    function castVote(uint[2] memory _vote, uint[2] memory _Y, uint[7] memory _zeroOrOneProof) public {
+    // function castVote(uint[2] memory _vote, uint[2] memory _Y, uint[7] memory _zeroOrOneProof) public {
+    function castVote(uint[2] memory _vote, uint[2] memory _Y, uint[18] memory _zeroOrOneProof) public {
         require(block.number >= finishRegistartionBlockNumber && block.number < finishVotingBlockNumber, "Voting phase is already closed");
         require(publicKeys[msg.sender] [0]!=0, "Unregistered voter");
         require(crypto.verifyZeroOrOne(_vote, _Y, _zeroOrOneProof),"Invalid zero or one proof");

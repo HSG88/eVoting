@@ -1,8 +1,8 @@
 pragma solidity ^0.5.0;
 
 contract Crypto {
-    uint256 constant public gx = 1;
-    uint256 constant public gy = 2;
+    uint256 constant public gx = 19823850254741169819033785099293761935467223354323761392354670518001715552183;
+    uint256 constant public gy = 15097907474011103550430959168661954736283086276546887690628027914974507414020;
     uint256 constant public q =  21888242871839275222246405745257275088548364400416034343698204186575808495617; // curve order
     uint256 constant public p =  21888242871839275222246405745257275088696311157297823662689037894645226208583; // curve modulus
 
@@ -115,14 +115,64 @@ contract Crypto {
         proof[5] = Add(Mul(r,x),s);//za
         proof[6] = Add(Mul(r,(Sub(x,proof[4]))),t);//zb
     }*/
-    function verifyZeroOrOne(uint[2] memory c, uint[2] memory H, uint[7] memory proof) public view returns (bool) {
-        uint x = uint(keccak256(abi.encodePacked(c[0],c[1],proof[0],proof[1],proof[2],proof[3])))%q;
-        uint[2] memory fza = ecAdd(ecMul(proof[4]),ecMul(proof[5],H));
-        uint[2] memory zb = ecAdd(ecMul(0),ecMul(proof[6],H));
-        uint[2] memory xCCa = ecAdd(ecMul(x,c),[proof[0],proof[1]]);
-        uint[2] memory xfCCb = ecAdd(ecMul(Sub(x,proof[4]),c),[proof[2],proof[3]]);
-        return Equal(fza,xCCa)&&Equal(zb,xfCCb);
-    }
+    
+    // function verifyZeroOrOne(uint[2] memory c, uint[2] memory H, uint[7] memory proof) public view returns (bool) {
+    //     uint x = uint(keccak256(abi.encodePacked(c[0],c[1],proof[0],proof[1],proof[2],proof[3])))%q;
+    //     uint[2] memory fza = ecAdd(ecMul(proof[4]),ecMul(proof[5],H));
+    //     uint[2] memory zb = ecAdd(ecMul(0),ecMul(proof[6],H));
+    //     uint[2] memory xCCa = ecAdd(ecMul(x,c),[proof[0],proof[1]]);
+    //     uint[2] memory xfCCb = ecAdd(ecMul(Sub(x,proof[4]),c),[proof[2],proof[3]]);
+    //     return Equal(fza,xCCa)&&Equal(zb,xfCCb);
+    // }
+
+    function verifyZeroOrOne(uint[2] memory c, uint[2] memory H, uint[18] memory proof) public view returns (bool ) {
+        
+        //  c = d1 + d2 ;
+        // c= proof[13], d1 = proof [9], d2= proof [10]
+        uint c_computed;
+        c_computed = Add(proof[9], proof[10]);
+
+        //  a1 = g ^ (r1). x ^ (d1) ;
+        // a1 = proof[1,2]
+        // r1 = proof[11]
+        // x = proof[14,15]
+        // d1 = proof[9]
+        uint[2] memory a1_computed;
+        a1_computed = ecAdd(ecMul(proof[11]), ecMul(proof[9],[proof[14], proof[15]]));
+        
+
+        // a2 = g ^ (r2) . x ^ (d2) ;
+        // a2 = proof[5,6]
+        // r2 = proof[12]
+        // x = proof[14,15]
+        // d2 = proof[10]
+        uint[2] memory a2_computed;
+        a2_computed = ecAdd(ecMul(proof[12]), ecMul(proof[10],[proof[14], proof[15]]));
+        
+
+        // b1 = h ^ (r1) . y ^ (d1)
+        // b1 = proof [3,4]
+        // H = H
+        // r1 = proof [11]
+        // y = proof [16,17]
+        // d1 = proof [9]
+        uint[2] memory b1_computed;
+        b1_computed = ecAdd(ecMul(proof[11], H), ecMul(proof[9],[proof[16], proof[17]]));
+        
+        // b1 = h ^ (r2) . (y/g) ^ (d2)
+        // b1 = proof[3,5]
+        // h = H
+        // r2 = proof[12]
+        // y = proof [16,17]
+        // d2 = proof [10]
+        uint[2] memory b2_computed;
+        b2_computed = ecAdd(ecAdd(ecMul(proof[12],H),ecMul(proof[10],[proof[16], proof[17]])),ecNeg(ecMul(proof[10])));
+        
+        return ((proof[13] == c_computed) && Equal(a1_computed, [proof[1], proof[2]]) &&
+        Equal(a2_computed, [proof[5], proof[6]]) && Equal(b1_computed, [proof[3], proof[4]])
+        && Equal(b2_computed, [proof[7], proof[8]]));
+        }
+
     function verifyMerkleProof(bytes32[] memory proof, bytes32 root, bytes32 leaf) public pure returns (bool) {
         bytes32 computedHash = leaf;
         for (uint256 i = 0; i < proof.length; i++) {
