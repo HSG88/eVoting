@@ -1,5 +1,5 @@
 # Scalable Open-Vote Network on Ethereum
-
+Paper: http://fc20.ifca.ai/wtsc/WTSC2020/WTSC20_paper_10.pdf
 # Installation 
 
  1. Install Nodejs from [https://nodejs.org/en/](https://nodejs.org/)
